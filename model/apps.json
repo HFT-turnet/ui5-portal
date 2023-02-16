@@ -1,0 +1,48 @@
+{"appcollection": [
+		{
+			"id": "Test",
+			"group": "Test 1",
+			"kpitrue":0,
+			"value":"",
+			"scale":"",
+			"valuecolor":"",
+			"indicator":"",
+			"unit":"",
+			"icon": "",
+			"header": "hallo",
+			"subheader": "",
+			"footer":"",
+			"appname": ""
+		},
+		{
+			"id": "Test2",
+			"group": "Test 2",
+			"kpitrue":0,
+			"value":"",
+			"scale":"",
+			"valuecolor":"",
+			"indicator":"",
+			"unit":"",
+			"icon": "",
+			"header": "hallo",
+			"subheader": "",
+			"footer":"",
+			"appname": ""
+		},
+		{
+			"id": "Test4",
+			"group": "Test 2",
+			"kpitrue":0,
+			"value":"",
+			"scale":"",
+			"valuecolor":"",
+			"indicator":"",
+			"unit":"",
+			"icon": "",
+			"header": "ffmfmfm",
+			"subheader": "",
+			"footer":"",
+			"appname": ""
+		}
+	]
+}
