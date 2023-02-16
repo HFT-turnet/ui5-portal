@@ -74,10 +74,10 @@ sap.ui.define([
 		that.getView().byId("portal").addContent(gridcontainer);
 	},
 	
-	addTile: function(sectionid, tilename, that){
+	addTile: function(sectionid, tiledata, that){
 		var tile=new sap.m.GenericTile({
-		                    header : tilename,
-					   		subheader: "Minitest",
+		                    header : tiledata.header,
+					   		subheader: tiledata.subheader,
 					   	 	press: "notimplemented",
 					   		url: "#"
 		                })
