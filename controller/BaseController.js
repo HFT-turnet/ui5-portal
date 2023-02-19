@@ -53,7 +53,13 @@ sap.ui.define([
 		var uniquegroups=groups.filter(function(item, pos) {
 			return groups.indexOf(item) == pos;
 		});
-		//console.log(uniquegroups);
+		// Search the array and replace "undefined" with "Generic"
+		for (var i = 0; i < uniquegroups.length; i++) {
+			if (uniquegroups[i] === undefined) {
+				uniquegroups[i] = "Generic";
+			}
+		};
+		console.log(uniquegroups);
 		// Create the sections according to the groups
 		uniquegroups.forEach(function(group){
 			//console.log(group);
@@ -61,11 +67,13 @@ sap.ui.define([
 		});
 		// Create the Apps in the sections
 		appcollection.forEach(function(app){
+			// First check if the tiledata is sufficient or needs enhancing to work.
+			app=that.checktile(app);
 			that.addTile(app.group.replace(/\s/g, ''),app,that);
 		});
 	},
 
-	addSection: function(sectionid, sectionname,that){
+	addSection: function(sectionid, sectionname, that){
 		// This is a function to create a section in the portal
 		// It receives a new section id, a section name and the view reference to work independent from the initial view.
 		// A bar with the title and a grid container are created. The grid container holds the id of the section.
@@ -81,42 +89,64 @@ sap.ui.define([
 	addTile: function(sectionid, tiledata, that){
 		// This is a function to create a tile in the portal in a specific section.
 		// It receives the section id, the tile data and the view reference to work independent from the initial view.
+		
+		// Create the tile
 		var tile=new sap.m.GenericTile({
 		                    header : tiledata.header,
 					   		subheader: tiledata.subheader,
-					   	 	press: "notimplemented",
-					   		url: "#"
-		                })
+					   		url: tiledata.appname
+		                });
 		tile.setLayoutData(new sap.f.GridContainerItemLayoutData({
 				minRows:2,
 				columns:2}));
+		// Apps are either KPI or Icon Apps
+		// If clause to check if the app is a KPI or Icon App via the field "kpitrue
+		//console.log(tiledata.kpitrue);
+		if (tiledata.kpitrue==1){
+			// Add KPI and trend to tile
+			tile.addTileContent(
+				new sap.m.TileContent({
+					footer: tiledata.footer,
+					unit: tiledata.unit
+				})
+				.setContent(new sap.m.NumericContent({
+					value: tiledata.value,
+					scale: tiledata.scale,
+					valueColor: tiledata.valuecolor,
+					indicator: tiledata.indicator
+					}))
+				);
+		} else {
 		// Add Icon and Footer to tile
-		tile.addTileContent(
-			new sap.m.TileContent({
-				footer: "footertext"
-			})
-			.setContent(new sap.m.ImageContent({
-				src: "sap-icon://time-overtime"
-				}))
-			);
-		// OR: add KPI and trend to tile
-		tile.addTileContent(
-			new sap.m.TileContent({
-				footer: "footertext",
-				unit: "EUR"
-			})
-			.setContent(new sap.m.NumericContent({
-				value: 1000,
-				scale: "M",
-				valueColor: "Error",
-				indicator: "Up" 
-				}))
-			);
-		console.log(tile);
+			tile.addTileContent(
+				new sap.m.TileContent({
+					footer: tiledata.footer
+				})
+				.setContent(new sap.m.ImageContent({
+					src: "sap-icon://"+tiledata.icon
+					}))
+				);
+		};
 		var form = that.getView().byId(sectionid);
-		//console.log(form);
 		form.addItem(tile);
-	}
+	},
+
+	checktile: function(tiledata){
+		// This is a function to check if the tiledata is sufficient or needs enhancing to work.
+		// It receives the tile data and returns the tile data.
+		// If the tiledata is not sufficient, the function will add the missing fields with default values.
+
+		// Check if the tiledata has a kpitrue. If not, change a number of fields.
+		if (tiledata.kpitrue==undefined){
+			tiledata.kpitrue=0;
+			tiledata.icon="action";
+			tiledata.subheader="App";
+			tiledata.header=tiledata.appname;
+			tiledata.id=tiledata.appname;
+			tiledata.group="Generic"
+		};
+		return tiledata;
+	}	 
 	
   });
 
