@@ -34,47 +34,12 @@
 			</Bar>
 		</customHeader>
 		<content>
-			<Bar>
-				<contentLeft>
-					<Label text="Separator 1"/>
-				</contentLeft>
-			</Bar>
-			<f:GridContainer
-				id="grid1"
-				class="sapUiSmallMargin"
-				snapToRow="true">
-				<f:layout>
-					<f:GridContainerSettings rowSize="84px" columnSize="84px" gap="8px" />
-				</f:layout>
-				<f:layoutXS>
-					<f:GridContainerSettings rowSize="70px" columnSize="70px" gap="8px" />
-				</f:layoutXS>		
-			</f:GridContainer>
-			<Bar>
-				<contentLeft>
-					<Label text="Separator 2"/>
-				</contentLeft>
-			</Bar>
 			<f:GridContainer
 				id="grid2"
 				class="sapUiSmallMargin"
+				visible="false"
 				snapToRow="true">
-				<f:layout>
-					<f:GridContainerSettings rowSize="84px" columnSize="84px" gap="8px" />
-				</f:layout>
-				<f:layoutXS>
-					<f:GridContainerSettings rowSize="70px" columnSize="70px" gap="8px" />
-				</f:layoutXS>
-
-	   			<GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Test" subheader="Minitest" press="notimplemented" url="#">
-					<layoutData>
-						<f:GridContainerItemLayoutData minRows="2" columns="2" />
-					</layoutData>
-					<TileContent footer="Footer" >
-						<ImageContent src="sap-icon://time-overtime" />
-	   				</TileContent>
-	   			</GenericTile>			
-			</f:GridContainer>
+			</f:GridContainer>	
 		</content>
 	</Page>
 
