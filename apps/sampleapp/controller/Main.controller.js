@@ -5,6 +5,9 @@ sap.ui.define([
   "use strict";
 
   return BaseController.extend("ui5.hft.portalappsample.controller.Main", {
+    onHomePress: function() {
+			window.open("../../#","_self");
+    },
     sayHello: function() {
       MessageBox.show("Hello World!");
     }
