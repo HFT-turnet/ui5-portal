@@ -1,48 +1,40 @@
 {"appcollection": [
 		{
 			"id": "Test",
-			"group": "Test 1",
+			"group": "Spiele",
 			"kpitrue":0,
 			"value":"",
 			"scale":"",
 			"valuecolor":"",
 			"indicator":"",
 			"unit":"",
-			"icon": "",
-			"header": "hallo",
-			"subheader": "",
-			"footer":"",
-			"appname": ""
-		},
-		{
-			"id": "Test2",
-			"group": "Test 2",
-			"kpitrue":0,
-			"value":"",
-			"scale":"",
-			"valuecolor":"",
-			"indicator":"",
-			"unit":"",
-			"icon": "",
-			"header": "hallo",
-			"subheader": "",
-			"footer":"",
+			"icon": "area-chart",
+			"header": "Spiel",
+			"subheader": "Game",
+			"footer":"Coole Spiele",
 			"appname": ""
 		},
 		{
 			"id": "Test4",
 			"group": "Test 2",
-			"kpitrue":0,
+			"kpitrue":1,
 			"value":"",
-			"scale":"",
-			"valuecolor":"",
-			"indicator":"",
+			"scale":"M",
+			"valuecolor":"Error",
+			"indicator":"Up",
 			"unit":"",
 			"icon": "",
 			"header": "ffmfmfm",
 			"subheader": "",
-			"footer":"",
+			"footer":"footertext",
 			"appname": ""
+		},
+		{
+			"id": "Tess",
+			"appname": "growtest"
+		},
+		{
+			"appname": "sampleapp"
 		}
 	]
 }

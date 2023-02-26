@@ -3,19 +3,37 @@
 	displayBlock="true"
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc">
-
-	<MessagePage
-		title="{i18n>appTitle}"
-		text="{i18n>appTitle}"
-		icon="sap-icon://accept"
-		id="page"
-		description="{i18n>appDescription}">
-		
-		<buttons>
-			<Button
-				text="{i18n>btnText}"
-				press="sayHello" />
-		</buttons>
-	</MessagePage>
+	<Page
+		title="{i18n>appTitle}">
+		<customHeader>
+			<Bar>
+				<contentLeft>
+					<Button
+						icon="sap-icon://home"
+						press=".onHomePress" />
+				</contentLeft>
+				<contentMiddle>
+					<Title
+						level="H2"
+						tooltip="{i18n>appTitle}"
+						text="{i18n>appTitle} - Dummy"/>
+				</contentMiddle>
+				<contentRight>
+				</contentRight>
+			</Bar>
+		</customHeader>
+		<content>
+			<MessagePage
+			text="{i18n>appTitle}"
+			icon="sap-icon://accept"
+			description="{i18n>appDescription}">
+			<buttons>
+				<Button
+					text="{i18n>btnText}"
+					press="sayHello" />
+			</buttons>
+			</MessagePage>
+		</content>
+	</Page>
 
 </mvc:View>

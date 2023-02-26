@@ -94,7 +94,8 @@ sap.ui.define([
 		var tile=new sap.m.GenericTile({
 		                    header : tiledata.header,
 					   		subheader: tiledata.subheader,
-					   		url: tiledata.appname
+							press: "onTilePress",
+					   		url: "apps/"+tiledata.appname
 		                });
 		tile.setLayoutData(new sap.f.GridContainerItemLayoutData({
 				minRows:2,
@@ -141,7 +142,7 @@ sap.ui.define([
 			tiledata.kpitrue=0;
 			tiledata.icon="action";
 			tiledata.subheader="App";
-			tiledata.header=tiledata.appname;
+			tiledata.header=tiledata.appname.charAt(0).toUpperCase() + tiledata.appname.slice(1);
 			tiledata.id=tiledata.appname;
 			tiledata.group="Generic"
 		};
