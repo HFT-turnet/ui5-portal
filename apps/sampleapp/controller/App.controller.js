@@ -14,6 +14,7 @@ sap.ui.define([
 	  localStorage.ft_user="Test";
 	  console.log(localStorage.ft_token);
 	  console.log(sessionStorage.ft_secret);
+	  console.log(localStorage.token);
     }
   });
 

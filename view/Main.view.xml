@@ -31,7 +31,8 @@
 						tooltip="{i18n>avatarButtonTooltip}"/>
 					<Title
 						level="H2"
-						text="{configs>/User/Username}"/>
+						visible="{configs>/Portal/LoginPossible}"
+						text="{configs>/User/Name}"/>
 				</contentRight>
 			</Bar>
 		</customHeader>
