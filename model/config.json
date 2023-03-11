@@ -1,0 +1,18 @@
+{
+	"Portal":
+		{
+			"LoginPossible": true,
+			"LoginForced": true,
+			"Settings": true,
+			"Backendbase": "https://api.portal.tur-net.de",
+			"Loginpath": "loginpassword",
+			"Appsource": "file"
+		},
+	"User": 
+		{
+			"Login": "",
+			"Username": "Anonymous",
+			"Token": "",
+			"UserType": ""
+		}
+}

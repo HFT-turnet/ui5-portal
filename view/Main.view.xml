@@ -21,15 +21,17 @@
 				<contentRight>
 					<Button
 						icon="sap-icon://settings"
+						visible="{configs>/Portal/Settings}"
 						press=".onSettingPress"
 						tooltip="{i18n>settingButtonTooltip}"/>
 					<Button
 						icon="sap-icon://customer"
-						press=".onUserPress"
+						visible="{configs>/Portal/LoginPossible}"
+						press="onOpenLoginDialog"
 						tooltip="{i18n>avatarButtonTooltip}"/>
 					<Title
 						level="H2"
-						text="Username"/>
+						text="{configs>/User/Username}"/>
 				</contentRight>
 			</Bar>
 		</customHeader>

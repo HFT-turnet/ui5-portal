@@ -1,8 +1,9 @@
 sap.ui.define([
 	"sap/ui/core/UIComponent",
 	"sap/ui/Device",
-	"./model/models"
-  ], function (UIComponent, Device, models) {
+	"./model/models",
+	"sap/ui/model/json/JSONModel"
+  ], function (UIComponent, Device, models, JSONModel) {
 	"use strict";
   
 	return UIComponent.extend("ui5.hft.portal.Component", {
@@ -15,7 +16,8 @@ sap.ui.define([
   
 		// create the device model
 		this.setModel(models.createDeviceModel(), "device");
-
+		
+		this.setModel(new JSONModel("model/config.json"), "configs");
 		this.getRouter().initialize();
 	  },
 	  getContentDensityClass: function() {
