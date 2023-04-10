@@ -26,7 +26,7 @@
 			<MessagePage
 			text="{i18n>appTitle}"
 			icon="sap-icon://accept"
-			description="{i18n>appDescription}">
+			description="{i18n>appDescription} {xmodel>/Status}">
 			<buttons>
 				<Button
 					text="{i18n>btnText}"

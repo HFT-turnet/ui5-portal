@@ -2,17 +2,13 @@
 	"Portal":
 		{
 			"LoginPossible": true,
-			"LoginForced": true,
+			"LoginForced": false,
 			"Settings": true,
-			"Backendbase": "https://api.portal.tur-net.de",
-			"Loginpath": "loginpassword",
-			"Appsource": "file"
-		},
-	"User": 
-		{
-			"Login": "",
-			"Username": "Anonymous",
-			"Token": "",
-			"UserType": ""
+			"Backendbase": "https://finaz.tur-net.de/api/v1",
+			"LoginPath": "auth",
+			"AppSource": "file",
+			"AppGetPath": "",
+			"SettingsSource": "file",
+			"SettingsGetPath": ""
 		}
 }

@@ -21,9 +21,18 @@ sap.ui.define([
       return this.getView().getModel(sName);
     },
     setModel: function(oModel, sName) {
-      this.getView().setModel(oModel, sName);
-      return this;
+      	this.getView().setModel(oModel, sName);
+		return this;
     },
+	createXModel: function(){
+		//var content='{"Status":"", "Settings":"", "Portalpath":"empty"}';
+		//console.log(content);
+		var xmodel=new JSONModel("model/xmodel.json");
+		//xmodel.setJSON(content);
+		this.getView().setModel(xmodel,"xmodel");
+		//console.log(xmodel);
+		return this;
+	},
     navTo: function(sName, oParameters, bReplace) {
       this.getRouter().navTo(sName, oParameters, undefined, bReplace);
     },
@@ -36,12 +45,42 @@ sap.ui.define([
       }
     },
 
-	getAppModel: function(){
-		var appcollection=new JSONModel("model/apps.json")
-		var that=this;
-		appcollection.attachRequestCompleted(function(){
-			that.loadApps(appcollection.getProperty("/appcollection"), that);
-		});
+	getAppModel: function(source, sourcepath){
+		console.log(source);
+		if (source=="file"){
+			var appcollection=new JSONModel("model/apps.json")
+			var that=this;
+			appcollection.attachRequestCompleted(function(){
+				that.loadApps(appcollection.getProperty("/appcollection"), that);
+			});
+		}
+		if (source=="api"){
+			var appcollection=new JSONModel()
+			
+			// ADD API CALL TO OBTAIN DATA
+
+			var that=this;
+			appcollection.attachRequestCompleted(function(){
+				that.loadApps(appcollection.getProperty("/appcollection"), that);
+			});
+		}
+
+	},
+	getSettingsModel: function(source,sourcepath){
+		if (source=="file"){
+			var settings=new JSONModel("model/settings.json");
+			// Works with "this" because the model is only being defined.
+			this.setModel(settings,"settings");
+		};
+		if (source=="api"){
+			var settings=new JSONModel();
+
+			// ADD API CALL TO OBTAIN DATA
+
+			this.setModel(settings,"settings");
+			
+		};
+		return settings;
 	},
 
 	loadApps: function(appcollection, that){
@@ -59,7 +98,7 @@ sap.ui.define([
 				uniquegroups[i] = "Generic";
 			}
 		};
-		console.log(uniquegroups);
+		//console.log(uniquegroups);
 		// Create the sections according to the groups
 		uniquegroups.forEach(function(group){
 			//console.log(group);
@@ -89,14 +128,14 @@ sap.ui.define([
 	addTile: function(sectionid, tiledata, that){
 		// This is a function to create a tile in the portal in a specific section.
 		// It receives the section id, the tile data and the view reference to work independent from the initial view.
-		
 		// Create the tile
 		var tile=new sap.m.GenericTile({
 		                    header : tiledata.header,
 					   		subheader: tiledata.subheader,
-							press: "onTilePress",
-					   		url: "apps/"+tiledata.appname
+							url: "apps/"+tiledata.appname
 		                });
+		// Assign Function for click on tile.
+		tile.attachPress("",this.onPress);
 		tile.setLayoutData(new sap.f.GridContainerItemLayoutData({
 				minRows:2,
 				columns:2}));

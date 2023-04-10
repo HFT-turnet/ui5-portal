@@ -21,18 +21,18 @@
 				<contentRight>
 					<Button
 						icon="sap-icon://settings"
-						visible="{configs>/Portal/Settings}"
+						visible="{config>/Portal/Settings}"
 						press=".onSettingPress"
 						tooltip="{i18n>settingButtonTooltip}"/>
 					<Button
 						icon="sap-icon://customer"
-						visible="{configs>/Portal/LoginPossible}"
+						visible="{config>/Portal/LoginPossible}"
 						press="onOpenLoginDialog"
 						tooltip="{i18n>avatarButtonTooltip}"/>
 					<Title
 						level="H2"
-						visible="{configs>/Portal/LoginPossible}"
-						text="{configs>/User/Name}"/>
+						visible="{config>/Portal/LoginPossible}"
+						text="{xmodel>/UserName}"/>
 				</contentRight>
 			</Bar>
 		</customHeader>

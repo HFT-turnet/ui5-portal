@@ -1,0 +1,11 @@
+{
+	"Base1":
+		{
+			"Var 1": true,
+			"Var 2": "loginpassword"
+		},
+	"Base2": 
+		{
+			"Txt": "Abc"
+		}
+}
