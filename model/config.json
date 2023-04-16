@@ -4,11 +4,12 @@
 			"LoginPossible": true,
 			"LoginForced": false,
 			"Settings": true,
-			"Backendbase": "https://finaz.tur-net.de/api/v1",
+			"Backendbase": "https://demoapi.tur-net.de/api/v1",
 			"LoginPath": "auth",
 			"AppSource": "file",
-			"AppGetPath": "",
+			"AppGetPath": "getapps",
 			"SettingsSource": "file",
-			"SettingsGetPath": ""
+			"SettingsGetPath": "settings",
+			"SettingsPostPath": "settings"
 		}
 }

@@ -118,16 +118,12 @@ sap.ui.define([
 			
 			// Obtain Token and put in config
 			var tokenModel = new JSONModel();
-			var path = configs.getProperty("/Portal/Backendbase") + "/" + configs.getProperty("/Portal/Loginpath");
+			var path = configs.getProperty("/Portal/Backendbase") + "/" + configs.getProperty("/Portal/LoginPath");
 			var oHeaders = {
 				"Content-Type": "application/x-www-form-urlencoded"
 			};
 			var params="login=" + login + "&password=" + password;
 			tokenModel.loadData(path, params, false, "POST", null, false, oHeaders);
-						
-			//tokenModel[0].getProperty("/access_token");
-			//console.log(tokenModel);
-			//console.log(tokenModel.getProperty("/access_token"));
 			
 			if (tokenModel.getObject("/access_token")) {
 				// Save Token & Details to config
@@ -154,5 +150,4 @@ sap.ui.define([
 			}
 	
   });
-
 });
