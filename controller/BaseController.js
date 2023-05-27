@@ -46,6 +46,8 @@ sap.ui.define([
     },
 
 	getAppModel: function(source, sourcepath){
+		var configs = new JSONModel();
+		configs = this.getModel("configs");
 		console.log(source);
 		if (source=="file"){
 			var appcollection=new JSONModel("model/apps.json")
@@ -56,9 +58,11 @@ sap.ui.define([
 		}
 		if (source=="api"){
 			var appcollection=new JSONModel()
-			
-			// ADD API CALL TO OBTAIN DATA
-
+			var oHeaders = {
+			    "Authorization": "Bearer " + sessionStorage.token
+				};
+			var path = configs.getProperty("/Portal/Backendbase") + "/" + sourcepath;
+			appcollection.loadData(path, null, true, "GET", null, false, oHeaders);
 			var that=this;
 			appcollection.attachRequestCompleted(function(){
 				that.loadApps(appcollection.getProperty("/appcollection"), that);
