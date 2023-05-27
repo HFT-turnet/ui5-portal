@@ -163,7 +163,7 @@ sap.ui.define([
 					footer: tiledata.footer
 				})
 				.setContent(new sap.m.ImageContent({
-					src: "sap-icon://"+tiledata.icon
+					src: "sap-icon://"+tiledata.sapicon
 					}))
 				);
 		};
@@ -179,7 +179,7 @@ sap.ui.define([
 		// Check if the tiledata has a kpitrue. If not, change a number of fields.
 		if (tiledata.kpitrue==undefined){
 			tiledata.kpitrue=0;
-			tiledata.icon="action";
+			tiledata.sapicon="action";
 			tiledata.subheader="App";
 			tiledata.header=tiledata.appname.charAt(0).toUpperCase() + tiledata.appname.slice(1);
 			tiledata.id=tiledata.appname;
