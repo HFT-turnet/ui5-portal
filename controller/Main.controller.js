@@ -39,7 +39,9 @@ sap.ui.define([
 			// Check login-obligation (islogin via token / loginname)
 			if (config.getProperty("/Portal/LoginForced")==true){
 				// Now all logic to ensure login is performed first happens
-				console.log("True Force")
+				if (xmodel.getProperty("/Status/Loggedin")==false){
+					that.onOpenLoginDialog();
+				}
 
 				// AFTER LOGIN CHECK PERFORM SAME ACTIVITIES AS UNDER ELSE
 				// maybe alternatively work with "return"
@@ -69,16 +71,7 @@ sap.ui.define([
 		oRouter.navTo(module);
 	},
 	
-    onSettingPress: function() {
-		BusyIndicator.show();
-		BusyIndicator.hide();
-		console.log("Setting");
-		var xmodel=this.getModel("xmodel");
-		console.log(xmodel.getJSON());
-		console.log(xmodel);
-    },
-	
-	onOpenLoginDialog : function () {
+	onOpenLoginDialog : function() {
 		BusyIndicator.show();
 		var oView = this.getView();
 		var oDialog = oView.byId("LoginDialog");
@@ -93,7 +86,7 @@ sap.ui.define([
 		 BusyIndicator.hide();
 	},
 	
-	onCloseLoginDialog : function () {
+	onCloseLoginDialog : function() {
 			this.getView().byId("LoginDialog").close();
 			},
 			
@@ -158,6 +151,20 @@ sap.ui.define([
 			// Trigger Reload of Apps in Portal as it is possible that API serves apps to not logged in users.
 			this.resetApps();
 			this.getAppModel(configs.getProperty("/Portal/AppSource"),configs.getProperty("/Portal/AppGetPath"));
+			},
+	
+	onSettingPress: function() {
+			BusyIndicator.show();
+			BusyIndicator.hide();
+			console.log("Setting");
+			
+			var oView = this._oView;
+			var oDialog = oView.byId("VariablesDialog");
+			// create dialog via fragment factory
+			oDialog = sap.ui.xmlfragment(oView.getId(), "ui5.hft.portal.view.VariablesDialog", oFragmentController);
+			// connect dialog to the root view of this component (models, lifecycle)
+			oView.addDependent(oDialog);
+
 			}
 	
   });

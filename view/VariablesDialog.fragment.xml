@@ -1,0 +1,70 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:l="sap.ui.layout"
+	xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core" >
+   <Dialog
+      id="VariablesDialog"
+      title ="Settings">
+	  <l:VerticalLayout
+	  		class="sapUiContentPadding"
+	  		width="100%">
+	  		<l:content>
+				<Label text="Month"/>
+		  			<Input 
+						value="{conf>/Current/Month}" submit="handleVariablesUpdate" maxLength="2" />	
+				<Label text="Year"/>
+			  		<Input value="{conf>/Current/Year}" submit="handleVariablesUpdate" maxLength="2"/>
+				<Label text="Kumuliert?"/>
+	  				<CheckBox selected="{conf>/Current/Kum}" />
+				<Label text="Kost"/>
+					<Input 
+						id="kostInput"
+						type="Text"
+						placeholder="Enter Kost ..."
+						value="{conf>/Current/Kost}"
+						submit="handleVariablesUpdate"  
+						showSuggestion="true"
+						suggestionItems="{kosts>/KostsCollection}">
+						<suggestionItems>
+							<core:ListItem text="{kosts>number}" additionalText="{kosts>name}"/>
+						</suggestionItems>
+					</Input>
+				<Label text="Account"/>
+				<Input
+						id="accountInput"
+						type="Text"
+						placeholder="Enter Account ..."
+						value="{conf>/Current/Account}"
+						submit="handleVariablesUpdate"  
+						showSuggestion="true"
+						suggestionItems="{accounts>/AccountsCollection}">
+						<suggestionItems>
+							<core:ListItem text="{accounts>number}" additionalText="{accounts>name}"/>
+						</suggestionItems>
+				</Input>
+				<Label text="BKRId"/>
+					<ActionSelect
+						id="bkrselect"
+						items="{bkrs>/UserBkrCollection}"
+						selectedKey="{conf>/Current/BkrId}"
+						change="onBkrChange">
+						<items>
+							<core:Item key="{bkrs>bkrid}" text="{bkrs>bkrnumber} - {bkrs>bkrname}" />
+						</items>
+					</ActionSelect>
+	  		</l:content>
+	  	</l:VerticalLayout>
+	  <endButton>
+          <Button
+             text="Update"
+             press="handleVariablesUpdate"/>
+
+	  </endButton>
+	  <beginButton>
+   		 <Button
+            text="Cancel"
+            press="onCloseVariablesDialog"/>
+       </beginButton>
+   </Dialog>
+</core:FragmentDefinition>
