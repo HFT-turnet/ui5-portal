@@ -109,7 +109,10 @@ sap.ui.define([
 			appcollection.loadData(path, null, true, "GET", null, false, oHeaders);
 			var that=this;
 			appcollection.attachRequestCompleted(function(){
-				that.loadApps(appcollection.getProperty("/appcollection"), that);
+				//Only continue with appcollections
+				if (!(appcollection.getProperty("/appcollection")===undefined)){
+					that.loadApps(appcollection.getProperty("/appcollection"), that);
+				}
 			});
 		}
 
