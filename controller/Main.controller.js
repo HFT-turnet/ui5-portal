@@ -6,17 +6,13 @@ sap.ui.define([
 ], function (BaseController, MessageBox, JSONModel, BusyIndicator) {
   "use strict";
 
-
-  //NOTE FOR NEXT STEPS:
-  // If this is done. Define what to put in xmodel and structure it with login
-  // Clarify which part of the model declares "logged in" status at init
-  // Determine how settings are to be handed over
-  // Fix the Init: xmodel, configs, procedure, settings load.
-
   return BaseController.extend("ui5.hft.portal.controller.Main", {
 	onInit: function() {
-		// Instantiate the Xmodel
-		this.createXModel();
+		// This may be called in different modes:
+		// 1 First call, models are the same as in config (same for logout call)
+		// 2 Reload of any kind (i.e. after login, refresh or minor)
+		// 3 Callback from an app => xmodel might have been adjusted.
+
 		// apply content density mode to root view
 		this.getView().addStyleClass(this.getOwnerComponent().getContentDensityClass());
 		console.log("Geladen Main");
@@ -25,12 +21,21 @@ sap.ui.define([
 		// Bootsteps: a) Get Config to determine login-forced. 
 		// b) check whether token and loginname is available. c) if not, show login dialog. 
 		// d) if yes, get data and show app.
+		
+		// Get Xmodel first: if it does not exist: load sceleton and update with localstorage
+		var xmodel = this.getModel("xmodel");
+		if (xmodel === undefined){
+			var xmodel=new JSONModel("model/xmodel.json");
+			this.getView().setModel(xmodel,"xmodel");
+			xmodel.attachRequestCompleted(function(){
+				that.xmodelFromSessionstorage();
+			})
+		};
 
-		// Get Configs for the App
+		// Get Configs for the App. Due to loading sequence, the model on the view is not yet available
 		var config=new JSONModel("model/config.json");
 		var that=this;
-		config.attachRequestCompleted(function(){
-			that.setModel(config,"config");
+		config.attachRequestCompleted(function(){			
 			// Check login-obligation (islogin via token / loginname)
 			if (config.getProperty("/Portal/LoginForced")==true){
 				// Now all logic to ensure login is performed first happens
@@ -50,19 +55,7 @@ sap.ui.define([
 			};
 		});
 	  },
-
-	setXModel: function(){
-		console.log("Set Xmodel");
-		var xmodel=this.getModel("xmodel");
-		xmodel.setProperty("/Status","Hallo Welt");
-		//xmodel.oData.Statu="Hallo Welt";
-		//xmodel.refresh();
-		//this.getView().setModel(xmodel,"xmodel");
-		//console.log("XX");
-		//console.log(xmodel.getProperty("/Status"));
-		console.log(xmodel.oData.Status);
-	},
-
+	  
 	onPress: function(evt){
 		// Get Target Frame
 		var module = evt.getSource().getUrl();
@@ -77,12 +70,12 @@ sap.ui.define([
 	},
 	
     onSettingPress: function() {
-		this.setXModel();
 		BusyIndicator.show();
 		BusyIndicator.hide();
 		console.log("Setting");
 		var xmodel=this.getModel("xmodel");
 		console.log(xmodel.getJSON());
+		console.log(xmodel);
     },
 	
 	onOpenLoginDialog : function () {
@@ -105,11 +98,8 @@ sap.ui.define([
 			},
 			
 	performLogin : function () {
-			// Get Status of Configuration
-			var configs = new JSONModel();
-			configs = this.getModel("configs");
-			//console.log("Configs Before");
-			//console.log(configs);
+			var configs = this.getModel("configs");
+			var xmodel = this.getModel("xmodel");
 			
 			// Start Login with Server
 			console.log("Start to obtain token");
@@ -127,26 +117,47 @@ sap.ui.define([
 			
 			if (tokenModel.getObject("/access_token")) {
 				// Save Token & Details to config
-				configs.setProperty("/User/Token", tokenModel.getProperty("/access_token"));
-				//configs.setProperty("/User/Userid", tokenModel.getProperty("/userid"));
-					//configs.setProperty("/Current/BkrNumberName", tokenModel.getProperty("/bkrnumbername"));
+				xmodel.setProperty("/User/Token", tokenModel.getProperty("/access_token"));
+				xmodel.setProperty("/Status/Loggedin", true);
+				xmodel.setProperty("/User/Id", tokenModel.getProperty("/userid"));
+				//configs.setProperty("/Current/BkrNumberName", tokenModel.getProperty("/bkrnumbername"));
 				//configs.setProperty("/Current/BkrId", tokenModel.getProperty("/bkrid"));
-				configs.setProperty("/User/Login", login);
+				xmodel.setProperty("/User/Login", login);
 				if (tokenModel.getProperty("/username")){
-					configs.setProperty("/User/Name", tokenModel.getProperty("/username"));
+					xmodel.setProperty("/User/Name", tokenModel.getProperty("/username"));
 				} else {
-					configs.setProperty("/User/Name", login);
+					xmodel.setProperty("/User/Name", login);
 				};
-				configs.refresh
-				console.log(configs);
-				//this.setdata();
+				xmodel.refresh;
 				sessionStorage.token = tokenModel.getProperty("/access_token");
+				// Save data into session storage.
+				this.xmodelToSessionstorage();
+				// Reset Apps (remove prior login users apps) and reload app model.
+				this.resetApps();
+				this.getAppModel(configs.getProperty("/Portal/AppSource"),configs.getProperty("/Portal/AppGetPath"));
 				//location.reload();
 			};
 			// Close Box & Reload Page
 			this.getView().byId("LoginDialog").close();
-			// Re-Initialize
-			//this.onInit();
+			},
+			
+	logout : function () {
+			var configs = this.getModel("configs");
+			// Destroy token
+			sessionStorage.removeItem('token');
+			// Remove Login Information
+			var xmodel = this.getModel("xmodel");
+			xmodel.setProperty("/User/Token", "");
+			xmodel.setProperty("/Status/Loggedin", false);
+			xmodel.setProperty("/User/Id", "");
+			xmodel.setProperty("/User/Login", "");
+			xmodel.setProperty("/User/Name", "");
+			xmodel.refresh
+			// Destroy sessiondata
+			sessionStorage.removeItem('xmodel');
+			// Trigger Reload of Apps in Portal as it is possible that API serves apps to not logged in users.
+			this.resetApps();
+			this.getAppModel(configs.getProperty("/Portal/AppSource"),configs.getProperty("/Portal/AppGetPath"));
 			}
 	
   });

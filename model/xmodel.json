@@ -1,9 +1,13 @@
 {
-	"Status":"",
-	"UserID":"",
-	"UserLogin":"",
-	"UserToken":"",
-	"UserName":"",
+	"Status": {
+		"Loggedin":false
+	},
+	"User": {
+		"Id":"",
+		"Login":"",
+		"Token":"",
+		"Name":""
+	},
 	"Portalpath":"",
 	"Settings":""
 }

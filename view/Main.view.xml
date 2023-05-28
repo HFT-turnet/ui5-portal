@@ -32,7 +32,11 @@
 					<Title
 						level="H2"
 						visible="{config>/Portal/LoginPossible}"
-						text="{xmodel>/UserName}"/>
+						text="{xmodel>/User/Name}"/>
+					<Button
+						icon="sap-icon://log"
+						visible="{xmodel>/Status/Loggedin}"
+						press="logout"/>
 				</contentRight>
 			</Bar>
 		</customHeader>

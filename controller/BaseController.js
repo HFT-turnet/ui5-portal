@@ -24,18 +24,62 @@ sap.ui.define([
       	this.getView().setModel(oModel, sName);
 		return this;
     },
-	createXModel: function(){
-		//var content='{"Status":"", "Settings":"", "Portalpath":"empty"}';
-		//console.log(content);
-		var xmodel=new JSONModel("model/xmodel.json");
-		//xmodel.setJSON(content);
-		this.getView().setModel(xmodel,"xmodel");
-		//console.log(xmodel);
-		return this;
+	
+	xmodelFromSessionstorage: function() {
+		// Xmodel has been established from scaffold. This is to load the data from sessionstorage into xmodel.
+		var xmodel = this.getModel("xmodel");
+		if (!(sessionStorage.xmodel===undefined)) {
+			xmodel.setJSON(sessionStorage.xmodel)
+			} else {
+				// if the sessionstorage is undefined but there is a token - try to retrieve login data.
+				if (!(sessionStorage.token===undefined || sessionStorage.token=="")) {
+					this.xmodelGetUserdata();
+				}
+			}
 	},
+	
+	xmodelToSessionstorage: function() {
+		// Save the xmodel-data to session storage.
+		var xmodel = this.getModel("xmodel");
+		sessionStorage.xmodel=xmodel.getJSON();
+	},
+	
+	xmodelGetUserdata: function(){
+		// If there is a token, but no further information, Call out to the API to obtain userdata again. If this is not successful, destroy the token reference.
+		// Users who do not have this function in the API need to uncomment this in xmodelFromSessionStorage, because it would always lead to the token being deleted.
+		var configs = this.getModel("configs");
+		var xmodel = this.getModel("xmodel");
+		
+		var userdata = new JSONModel();
+		var path = configs.getProperty("/Portal/Backendbase") + "/" + configs.getProperty("/Portal/CurrentUserPath");
+		var oHeaders = {
+		    "Authorization": "Bearer " + sessionStorage.token
+			};
+		userdata.loadData(path, null, true, "GET", null, false, oHeaders);
+		userdata.attachRequestCompleted(function(){
+			if (userdata.getObject("/login")) {
+				xmodel.setProperty("/User/Token", sessionStorage.token);
+				xmodel.setProperty("/Status/Loggedin", true);
+				xmodel.setProperty("/User/Id", userdata.getProperty("/id"));
+				xmodel.setProperty("/User/Login", userdata.getProperty("/login"));
+				if (userdata.getProperty("/name")){
+					xmodel.setProperty("/User/Name", userdata.getProperty("/name"));
+				} else {
+					xmodel.setProperty("/User/Name", userdata.getProperty("/login"));
+				};
+				xmodel.refresh;
+				sessionStorage.xmodel=xmodel.getJSON();
+			} else {
+				// If we do not get a valid login back, it is likely the token is unvalid.
+				sessionStorage.removeItem('token');
+			}
+		})
+	},
+	
     navTo: function(sName, oParameters, bReplace) {
       this.getRouter().navTo(sName, oParameters, undefined, bReplace);
     },
+	
     onNavBack: function() {
       const sPreviousHash = History.getInstance().getPreviousHash();
       if (sPreviousHash !== undefined) {
@@ -190,7 +234,11 @@ sap.ui.define([
 			tiledata.group="Generic"
 		};
 		return tiledata;
-	}	 
+	},
+	
+	resetApps: function(){
+		this.getView().byId("portal").destroyContent();
+	} 
 	
   });
 
