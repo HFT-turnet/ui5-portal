@@ -7,6 +7,8 @@ sap.ui.define([
   "use strict";
 
   return BaseController.extend("ui5.hft.portal.controller.Main", {
+	// GENERAL SETUP AND LOGIN APPS
+	  
 	onInit: function() {
 		// This may be called in different modes:
 		// 1 First call, models are the same as in config (same for logout call)
@@ -70,6 +72,8 @@ sap.ui.define([
 		//console.log(sessionStorage.xmodel);
 		oRouter.navTo(module);
 	},
+	
+	// SECTION ON LOGIN HANDLING
 	
 	onOpenLoginDialog : function() {
 		BusyIndicator.show();
@@ -153,19 +157,139 @@ sap.ui.define([
 			this.getAppModel(configs.getProperty("/Portal/AppSource"),configs.getProperty("/Portal/AppGetPath"));
 			},
 	
-	onSettingPress: function() {
+	// SECTION ON SETTINGS HANDLING
+	
+	onOpenSettingDialog: function() {
 			BusyIndicator.show();
-			BusyIndicator.hide();
 			console.log("Setting");
 			
-			var oView = this._oView;
-			var oDialog = oView.byId("VariablesDialog");
-			// create dialog via fragment factory
-			oDialog = sap.ui.xmlfragment(oView.getId(), "ui5.hft.portal.view.VariablesDialog", oFragmentController);
-			// connect dialog to the root view of this component (models, lifecycle)
-			oView.addDependent(oDialog);
-
-			}
+			var oView = this.getView();	
+			var oDialog = oView.byId("SettingDialog");
+         	// create dialog lazily
+         	if (!oDialog) {
+            	// create dialog via fragment factory
+            	oDialog = sap.ui.xmlfragment(oView.getId(), "ui5.hft.portal.view.SettingDialog", this);
+            	oView.addDependent(oDialog);
+         		}
+ 			oDialog.open();
+			BusyIndicator.hide();
+			this.settingGenerateFields();
+			},
 	
+	settingGenerateFields: function() {
+			// to implement: only for the first time. After that the view is established
+		
+			var settingmodel=this.getModel("settings");			
+			var fields = settingmodel.getProperty("/Meta/");			
+			Object.keys(fields).forEach((field) => {
+				//console.log(fields[field])
+				// Create Label
+				this.settingCreateLabel(field, fields[field])
+				// Create Field dependent on type
+				if (fields[field].type.slice(0, 5)=="input"){this.settingCreateInput(field, fields[field])};
+				if (fields[field].type=="checkbox"){this.settingCreateCheckbox(field, fields[field])};
+				if (fields[field].type=="dropdown"){this.settingCreateDropdown(field, fields[field])};
+				});
+			},
+			
+	settingCreateLabel: function(key, field) {
+			//console.log(key);
+			var frame=this.getView().byId("settingframe");
+			var labelentry= new sap.m.Label("label_"+key,{
+							required: field.required,
+							text: field.label,
+							labelFor: "input_"+key
+							});
+			frame.addContent(labelentry);
+	},
+	settingCreateInput: function(key, field) {
+			var frame=this.getView().byId("settingframe");
+			if (field.type=="input_text"){
+				var inputentry= new sap.m.Input("input_"+key,{
+							type: sap.m.InputType.Text
+							});
+				};
+			if (field.type=="input_number"){
+				var inputentry= new sap.m.Input("input_"+key,{
+							type: sap.m.InputType.Number
+							});
+				};
+			if (field.type=="input_helper"){
+				var inputentry= new sap.m.Input("input_"+key,{
+							type: sap.m.InputType.Text,
+							showSuggestion: true
+							});
+			// Iterate over the dropdown items.
+				field.items.forEach((li) => { 
+						inputentry.addSuggestionItem(new sap.ui.core.Item({
+											key: li.key,
+											text: li.text
+											}));
+						});
+				};								
+			frame.addContent(inputentry);
+	},
+	settingCreateCheckbox: function(key, field) {
+			var frame=this.getView().byId("settingframe");
+			var inputentry= new sap.m.CheckBox("input_"+key,{
+										});;
+			frame.addContent(inputentry);
+	},
+	settingCreateDropdown: function(key, field) {
+			var frame=this.getView().byId("settingframe");
+			var inputentry= new sap.m.Select("input_"+key,{
+								name: key
+								});
+			// Iterate over the dropdown items.
+			field.items.forEach((li) => { 
+					inputentry.addItem(new sap.ui.core.Item({
+									key: li.key,
+									text: li.text
+									}));
+								});
+			frame.addContent(inputentry);
+	},
+	
+	onTest: function(){
+			//var oDialog = this.getView().byId("SettingDialog");
+			var frame=this.getView().byId("settingframe");
+			
+			// Iterate over the settings.
+			// Define a Label
+			// Define an input (technical name, type, length, triggerrefresh, collection for dropdown).
+			// In case of API: if a field is changed the "triggerrefresh leads to a new load of the setting"
+			
+			// General types Input, Dropdown, Checkbox
+			// Input
+			var labelentry1= new sap.m.Label("label1",{
+											required: true,
+											text: "Text"
+											})
+			var settingentry1=new sap.m.Input({
+											type: sap.m.InputType.Text
+											})
+			var settingentry2=new sap.m.Input({
+											type: sap.m.InputType.Number
+											})
+			frame.addContent(labelentry1);
+			frame.addContent(settingentry1);
+			frame.addContent(settingentry2);
+			
+			// Dropdown
+			
+			// Checkbox
+			
+			//frame.destroyContent();
+			},
+			
+	onChange: function(){
+			// Save the changed data into the model
+			// In Case of API & SettingsRemote activated also push the settings
+			// Update the settings to consider dependencies.
+			},
+			
+	onCloseSettingDialog : function() {
+			this.getView().byId("SettingDialog").close();
+			}
   });
 });

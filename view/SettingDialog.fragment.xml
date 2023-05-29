@@ -1,0 +1,22 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:l="sap.ui.layout"
+	xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core" >
+   <Dialog
+      id="SettingDialog"
+      title ="{i18n>setting}">
+	  <l:VerticalLayout
+	  		class="sapUiContentPadding"
+	  		width="100%"
+			id="settingframe" >
+	  		<l:content>
+	  		</l:content>
+	  	</l:VerticalLayout>
+	  <endButton>
+   		 <Button
+            text="Close"
+            press="onCloseSettingDialog"/>
+       </endButton>
+   </Dialog>
+</core:FragmentDefinition>

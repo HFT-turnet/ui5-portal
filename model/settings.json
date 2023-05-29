@@ -1,11 +1,57 @@
 {
-	"Base1":
+	"Meta":
 		{
-			"Var 1": true,
-			"Var 2": "loginpassword"
+			"tech1": 
+				{
+					"label": "Tech 1",
+					"type": "input_text",
+					"required": true,
+					"length": "2"
+				},
+			"tech2": 
+				{
+					"label": "Tech 2",
+					"type": "input_number",
+					"required": false,
+					"length": "2"
+				},
+			"tech3": 
+				{
+					"label": "Tech 3",
+					"type": "checkbox",
+					"required": false
+				},
+			"tech4": 
+				{
+					"label": "Tech 4",
+					"type": "dropdown",
+					"required": false,
+					"items": [
+						{"key":123, "text":"123-Kuchen"},
+						{"key":13, "text":"13-Trinken"},
+						{"key":12, "text":"12-Essen"},
+						{"key":23, "text":"23-Kekse"}
+						]
+				},
+			"tech5": 
+				{
+					"label": "Tech 5",
+					"type": "input_helper",
+					"required": false,
+					"items": [
+						{"key":123, "text":"123-Kuchen"},
+						{"key":13, "text":"13-Trinken"},
+						{"key":12, "text":"12-Essen"},
+						{"key":23, "text":"23-Kekse"}
+						]
+				}
 		},
-	"Base2": 
+	"Values": 
 		{
-			"Txt": "Abc"
+			"tech1":"Hallo",
+			"tech2":"12",
+			"tech3": true,
+			"tech4": "13",
+			"tech5": "345"
 		}
 }

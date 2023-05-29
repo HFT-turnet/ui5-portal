@@ -22,7 +22,7 @@
 					<Button
 						icon="sap-icon://settings"
 						visible="{configs>/Portal/Settings}"
-						press=".onSettingPress"
+						press=".onOpenSettingDialog"
 						tooltip="{i18n>settingButtonTooltip}"/>
 					<Button
 						icon="sap-icon://customer"
