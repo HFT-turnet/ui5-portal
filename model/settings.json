@@ -6,14 +6,13 @@
 					"label": "Tech 1",
 					"type": "input_text",
 					"required": true,
-					"length": "2"
+					"placeholder":"Month"
 				},
 			"tech2": 
 				{
 					"label": "Tech 2",
 					"type": "input_number",
-					"required": false,
-					"length": "2"
+					"required": false
 				},
 			"tech3": 
 				{
@@ -26,6 +25,7 @@
 					"label": "Tech 4",
 					"type": "dropdown",
 					"required": false,
+					"requirerefresh": true,
 					"items": [
 						{"key":123, "text":"123-Kuchen"},
 						{"key":13, "text":"13-Trinken"},
@@ -38,6 +38,7 @@
 					"label": "Tech 5",
 					"type": "input_helper",
 					"required": false,
+					"placeholder":"Type Bakery",
 					"items": [
 						{"key":123, "text":"123-Kuchen"},
 						{"key":13, "text":"13-Trinken"},

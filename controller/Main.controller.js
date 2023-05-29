@@ -54,7 +54,7 @@ sap.ui.define([
 				// Get Base Settings, if applicable
 				if (config.getProperty("/Portal/Settings")==true){
 					var settings=that.getSettingsModel(config.getProperty("/Portal/SettingsSource"),config.getProperty("/Portal/SettingsGetPath"));
-					console.log(settings);
+					//console.log(settings);
 				};
 			};
 		});
@@ -182,13 +182,18 @@ sap.ui.define([
 			var settingmodel=this.getModel("settings");			
 			var fields = settingmodel.getProperty("/Meta/");			
 			Object.keys(fields).forEach((field) => {
-				//console.log(fields[field])
 				// Create Label
-				this.settingCreateLabel(field, fields[field])
+				this.settingCreateLabel(field, fields[field]);
+				// Get current value, if exists
+				var value="";
+				// Get from current Settings
+				if (value==""){value};
+				// Get from defaults via API / File
+				if (value=="") {value=settingmodel.getProperty("/Values/")[field];}
 				// Create Field dependent on type
-				if (fields[field].type.slice(0, 5)=="input"){this.settingCreateInput(field, fields[field])};
-				if (fields[field].type=="checkbox"){this.settingCreateCheckbox(field, fields[field])};
-				if (fields[field].type=="dropdown"){this.settingCreateDropdown(field, fields[field])};
+				if (fields[field].type.slice(0, 5)=="input"){this.settingCreateInput(field, fields[field], value)};
+				if (fields[field].type=="checkbox"){this.settingCreateCheckbox(field, fields[field], value)};
+				if (fields[field].type=="dropdown"){this.settingCreateDropdown(field, fields[field], value)};
 				});
 			},
 			
@@ -202,11 +207,12 @@ sap.ui.define([
 							});
 			frame.addContent(labelentry);
 	},
-	settingCreateInput: function(key, field) {
+	settingCreateInput: function(key, field, value) {
 			var frame=this.getView().byId("settingframe");
 			if (field.type=="input_text"){
 				var inputentry= new sap.m.Input("input_"+key,{
-							type: sap.m.InputType.Text
+							type: sap.m.InputType.Text,
+							placeholder: field.placeholder
 							});
 				};
 			if (field.type=="input_number"){
@@ -217,28 +223,34 @@ sap.ui.define([
 			if (field.type=="input_helper"){
 				var inputentry= new sap.m.Input("input_"+key,{
 							type: sap.m.InputType.Text,
-							showSuggestion: true
+							showSuggestion: true,
+							placeholder: field.placeholder
 							});
 			// Iterate over the dropdown items.
 				field.items.forEach((li) => { 
 						inputentry.addSuggestionItem(new sap.ui.core.Item({
 											key: li.key,
-											text: li.text
+											text: li.text,
 											}));
 						});
-				};								
+				};
+			inputentry.setValue(value);					
 			frame.addContent(inputentry);
 	},
-	settingCreateCheckbox: function(key, field) {
+	
+	settingCreateCheckbox: function(key, field, value) {
 			var frame=this.getView().byId("settingframe");
 			var inputentry= new sap.m.CheckBox("input_"+key,{
+								selected: value
 										});;
 			frame.addContent(inputentry);
 	},
-	settingCreateDropdown: function(key, field) {
+	
+	settingCreateDropdown: function(key, field, value) {
 			var frame=this.getView().byId("settingframe");
 			var inputentry= new sap.m.Select("input_"+key,{
-								name: key
+								name: key,
+								selectedKey: value
 								});
 			// Iterate over the dropdown items.
 			field.items.forEach((li) => { 
@@ -247,49 +259,60 @@ sap.ui.define([
 									text: li.text
 									}));
 								});
+			inputentry.attachChange("",this.onSelectChange);
 			frame.addContent(inputentry);
 	},
 	
 	onTest: function(){
-			//var oDialog = this.getView().byId("SettingDialog");
-			var frame=this.getView().byId("settingframe");
+
+	},
 			
-			// Iterate over the settings.
-			// Define a Label
-			// Define an input (technical name, type, length, triggerrefresh, collection for dropdown).
-			// In case of API: if a field is changed the "triggerrefresh leads to a new load of the setting"
+	onSelectChange: function(oEvent){
+			var settingmodel=this.getModel("settings");		
+			// There is a configuration option to reload value helps and the settings overall, if a drop-down is changed.
+			// This function picks that up. If the setting is not set, it does not do anything.
+			//console.log(oEvent.getParameters());
 			
-			// General types Input, Dropdown, Checkbox
-			// Input
-			var labelentry1= new sap.m.Label("label1",{
-											required: true,
-											text: "Text"
-											})
-			var settingentry1=new sap.m.Input({
-											type: sap.m.InputType.Text
-											})
-			var settingentry2=new sap.m.Input({
-											type: sap.m.InputType.Number
-											})
-			frame.addContent(labelentry1);
-			frame.addContent(settingentry1);
-			frame.addContent(settingentry2);
+			if (settingmodel.getProperty("/Meta/" + oEvent.getParameters().id.slice(6)).requirerefresh==true){
+				console.log("I need to reload");
+			}
 			
-			// Dropdown
-			
-			// Checkbox
-			
-			//frame.destroyContent();
-			},
-			
-	onChange: function(){
-			// Save the changed data into the model
-			// In Case of API & SettingsRemote activated also push the settings
-			// Update the settings to consider dependencies.
-			},
+	},
 			
 	onCloseSettingDialog : function() {
-			this.getView().byId("SettingDialog").close();
+			// Update all Variables and the XModel
+			var xmodel = this.getModel("xmodel");
+			this.xmodelToSessionstorage();
+			var xmodelsession=JSON.parse(sessionStorage.xmodel)
+			var settings=xmodelsession["Settings"]
+			var frameitems=this.getView().byId("settingframe").getContent();
+	
+			frameitems.forEach((item)=> {
+				if (item.sId.slice(0, 5)=="input"){
+					var type=item.getMetadata().getName();
+					var key=item.sId.slice(6)
+					switch(type) {
+				  		case "sap.m.Input":
+				    		var value= item.mProperties.value;
+							break;
+			  	  	  	case "sap.m.CheckBox":
+			    			var value= item.mProperties.selected;
+							break;
+		  		  	  	case "sap.m.Select":
+		    				var value= item.mProperties.selectedKey;
+							break;
+						}
+				// We now update / create the settings hash.
+				settings[key]=value
 			}
+		   });
+		   // Write back to session and xmodel
+		   xmodelsession["Settings"]=settings;
+		   sessionStorage.xmodel=JSON.stringify(xmodelsession);
+		   xmodel.setJSON(JSON.stringify(xmodelsession));
+			this.getView().byId("SettingDialog").close();
+			// Check API Mode & Consequence like push to API
+			//..
+	}
   });
 });

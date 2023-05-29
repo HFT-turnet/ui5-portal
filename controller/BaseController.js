@@ -117,6 +117,7 @@ sap.ui.define([
 		}
 
 	},
+	
 	getSettingsModel: function(source,sourcepath){
 		if (source=="file"){
 			var settings=new JSONModel("model/settings.json");
