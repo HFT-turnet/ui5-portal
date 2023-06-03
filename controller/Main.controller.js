@@ -57,25 +57,34 @@ sap.ui.define([
 				// With Login the load of Userdata and Settings is performed. But if we are logged in, it must be triggered.
 				if (xmodel.getProperty("/Status/Loggedin")==true){
 					that.getAppModel(config.getProperty("/Portal/AppSource"),config.getProperty("/Portal/AppGetPath"));
+					// Get Settingmodel, but let xmodel overrule.
+					that.apiSettingsIfNeeded("xmodel");
 				}
 			} else {
 				// No forced login, Settings and Apps can be generated as defined.
 				// Get the Apps
 				that.getAppModel(config.getProperty("/Portal/AppSource"),config.getProperty("/Portal/AppGetPath"));
-				// Get Base Settings, if settings exist and source is API, otherwise see above.
-				if ((config.getProperty("/Portal/Settings")==true) && (config.getProperty("/Portal/SettingsSource")=="api")){
-					var settings=that.getSettingsModel(config.getProperty("/Portal/SettingsSource"),config.getProperty("/Portal/SettingsGetPath"));
-					console.log("Settings from API");
-					that.setModel(settings,"settings");
-					settings.attachRequestCompleted(function(){
-						// Check Settings against xmodel. API Settings would have precedence.
-						that.syncSettings("api");
-					});
-					console.log(settings);
-				};
+				// Check and get settings if api
+				that.apiSettingsIfNeeded("api");
+				//	console.log(settings);	
 			};
 		});
 	  },
+	
+	apiSettingsIfNeeded: function(leading){
+		var configs = this.getModel("configs");
+		// Get Base Settings, if settings exist and source is API, otherwise see above.
+		if ((configs.getProperty("/Portal/Settings")==true) && (configs.getProperty("/Portal/SettingsSource")=="api")){
+			var settings=this.getSettingsModel(configs.getProperty("/Portal/SettingsSource"),configs.getProperty("/Portal/SettingsGetPath"));
+			console.log("Settings from API");
+			this.setModel(settings,"settings");
+			var that=this;
+			settings.attachRequestCompleted(function(){
+				// Check Settings against xmodel. API Settings would have precedence.
+				that.syncSettings(leading);
+			});
+		};
+	},
 	  
 	onPress: function(evt){
 		// Get Target Frame
@@ -185,10 +194,9 @@ sap.ui.define([
 	// SECTION ON SETTINGS HANDLING
 	
 	onOpenSettingDialog: function() {
-			console.log(this.getModel("settings"));
+			//console.log(this.getModel("settings"));
 			BusyIndicator.show();
 			console.log("Setting");
-			
 			var oView = this.getView();	
 			var oDialog = oView.byId("SettingDialog");
          	// create dialog lazily
@@ -204,9 +212,8 @@ sap.ui.define([
 	
 	settingGenerateFields: function() {
 			var xmodel = this.getModel("xmodel");
-			console.log(xmodel);
-			var settingmodel=this.getModel("settings");			
-			var fields = settingmodel.getProperty("/Meta/");			
+			var settingmodel=this.getModel("settings");
+			var fields = settingmodel.getProperty("/Meta/");	
 			Object.keys(fields).forEach((field) => {
 				// Create Label
 				this.settingCreateLabel(field, fields[field]);
@@ -280,35 +287,42 @@ sap.ui.define([
 									text: li.text
 									}));
 								});
-			inputentry.attachChange("",this.onSelectChange);
+			inputentry.attachChange("",this.onSelectChange.bind(this));
 			frame.addContent(inputentry);
 	},
 	
 	onSelectChange: function(oEvent){
-			var settingmodel=this.getModel("settings");		
+			var settingmodel=this.getModel("settings");	
+			var configs = this.getModel("configs");
 			// There is a configuration option to reload value helps and the settings overall, if a drop-down is changed.
 			// This function picks that up. If the setting is not set, it does not do anything.
 			//console.log(oEvent.getParameters());
-			
 			if (settingmodel.getProperty("/Meta/" + oEvent.getParameters().id.slice(6)).requirerefresh==true){
 				console.log("I need to reload");
-				var xmodelsession=JSON.parse(sessionStorage.xmodel)
-				// Replace the triggering setting
-				console.log(oEvent.getParameters().id.slice(6));
+				this.onCloseSettingDialog();
+				var oDialog = this.getView().byId("SettingDialog");
+				oDialog.destroy();
+				//this.apiSettingsIfNeeded("api");
+				var settings=this.getSettingsModel(configs.getProperty("/Portal/SettingsSource"),configs.getProperty("/Portal/SettingsGetPath"));
+				this.setModel(settings,"settings");
+				var that=this;
+				settings.attachRequestCompleted(function(){
+					// Check Settings against xmodel. API Settings would have precedence.
+					that.syncSettings("api");
+					that.onOpenSettingDialog();
+				});
 			}
 			
 	},
 			
 	onCloseSettingDialog : function() {
-			console.log("Close received");
+			var configs = this.getModel("configs");
 			// Update all Variables and the XModel
 			var xmodel = this.getModel("xmodel");
 			this.xmodelToSessionstorage();
 			var xmodelsession=JSON.parse(sessionStorage.xmodel)
 			var settingsinxmodel=xmodelsession["Settings"]
 			var frameitems=this.getView().byId("settingframe").getContent();
-
-			var configs = this.getModel("configs");
 	
 			frameitems.forEach((item)=> {
 				if (item.sId.slice(0, 5)=="input"){
@@ -333,13 +347,13 @@ sap.ui.define([
 		   xmodelsession["Settings"]=settingsinxmodel;
 		   sessionStorage.xmodel=JSON.stringify(xmodelsession);
 		   xmodel.setJSON(JSON.stringify(xmodelsession));
-			this.getView().byId("SettingDialog").close();
-			// Check API Mode & Consequence like push to API
-			if (configs.getProperty("/Portal/SettingsRemote")=="true"){
-				console.log("Hi There");
+		   	// Check API Mode & Consequence like push to API
+			//console.log(configs)
+			if (configs.getProperty("/Portal/SettingsRemote")==true){
 				//Push to API
 				this.apipushSettings();
 			}
+			this.getView().byId("SettingDialog").close();
 	}
   });
 });

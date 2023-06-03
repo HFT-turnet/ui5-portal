@@ -2,16 +2,16 @@
 	"Portal":
 		{
 			"LoginPossible": true,
-			"LoginForced": true,
+			"LoginForced": false,
 			"Settings": true,
 			"Backendbase": "http://localhost:3000/api/v1",
 			"LoginPath": "auth",
 			"CurrentUserPath": "myuser",
-			"AppSource": "api",
+			"AppSource": "file",
 			"AppGetPath": "apps/portal",
-			"SettingsSource": "api",
+			"SettingsSource": "file",
 			"SettingsGetPath": "settings",
-			"SettingsRemote": true,
+			"SettingsRemote": false,
 			"SettingsPostPath": "settings"
 		}
 }

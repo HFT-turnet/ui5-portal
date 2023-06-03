@@ -149,7 +149,6 @@ sap.ui.define([
 	
 	apipushSettings: function(){
 		// This function pushes the settings to the API.
-		console.log("pushing");
 		var configs = this.getModel("configs");
 		var xmodelsession=JSON.parse(sessionStorage.xmodel);
 		var settingsinxmodel=xmodelsession["Settings"];
@@ -158,8 +157,8 @@ sap.ui.define([
 			"Authorization": "Bearer " + sessionStorage.token
 			};
 		var path = configs.getProperty("/Portal/Backendbase") + "/" + configs.getProperty("/Portal/SettingsPostPath");
-			console.log(path);
-			settingapi.loadData(path, settingsinxmodel, true, "POST", null, false, oHeaders);
+		//console.log(path);
+		settingapi.loadData(path, settingsinxmodel, true, "POST", null, false, oHeaders);
 	},
 
 	// APP Functions
