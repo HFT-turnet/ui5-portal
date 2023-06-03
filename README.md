@@ -3,7 +3,7 @@ A portal / app template structure for API based open UI5 suites.
 This project is using the openui5 libraries and has been jump-started by the easy-ui5 generator.
 
 The goal for this project is to provide an easy framework for a landing page of Multi-App OpenUI5 projects that either stand alone or connect to a web-based API. 
-The overview / portal page manages the display of the apps in the App-Folder and to obtain a token or variables to be managed around the apps.
+The overview / portal page manages the display of the apps in the App-Folder. Also it is able to manage an API login (to obtain a token) and can manage settings for variables to be maintained for the apps.
 
 ![Screenshot](screenshot.png)
 
@@ -29,9 +29,9 @@ Settings can be defined in a file like in the model/settings.json.
 "Meta" describes the kind of variables and the maintenance view for these variables (when opening the settings dialog).
 
 "Values" defines the initial values of each of these variables defined in "Meta". After the instantiation of the portal, the current value of the variables is maintained in the Xmodel (see below).
-As with Login and Apps, Settings can remain local or can be set to be pulled from an API. In this case the same structure as in the file needs to be provided by the API. Settingsource needs to be set to "api", the GET path needs to be defined. 
+As with Login and Apps, Settings can remain local or can be set to be pulled from an API. In this case the same structure as in the file needs to be provided by the API. "Settingsource" needs to be set to "api", the GET path needs to be defined. 
 
-If settingchanges are to be pushed to the API, set "Settingsremote" to true and provide a path for the POST request (relative to the backendpath).
+If setting-changes are to be pushed to the API, set "Settingsremote" to true and provide a path for the POST request (relative to the backendpath).
 
 Special case: a dropdown can receive the attribute: "requirerefresh"=true this triggers the settings dialog to be closed, the data to be saved, the API to receive a POST request with the settings, to immediately GET the settings again. You would want to use that, when the data in the dropdown would trigger other fields / dropdowns / value helps to contain different values.
 
