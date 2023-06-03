@@ -54,7 +54,10 @@ sap.ui.define([
 				if (xmodel.getProperty("/Status/Loggedin")==false){
 					that.onOpenLoginDialog();
 				}
-				// With Login the load of Userdata and Settings is performed.
+				// With Login the load of Userdata and Settings is performed. But if we are logged in, it must be triggered.
+				if (xmodel.getProperty("/Status/Loggedin")==true){
+					that.getAppModel(config.getProperty("/Portal/AppSource"),config.getProperty("/Portal/AppGetPath"));
+				}
 			} else {
 				// No forced login, Settings and Apps can be generated as defined.
 				// Get the Apps
@@ -82,8 +85,7 @@ sap.ui.define([
 		//console.log(evt.getSource().getUrl());
 		var xmodel=this.getModel("xmodel");
 		xmodel.oData.Status="Handover Welt";
-		sessionStorage.xmodel=xmodel.getJSON();
-		//console.log(sessionStorage.xmodel);
+		this.xmodelToSessionstorage
 		oRouter.navTo(module);
 	},
 	
@@ -131,8 +133,6 @@ sap.ui.define([
 				xmodel.setProperty("/User/Token", tokenModel.getProperty("/access_token"));
 				xmodel.setProperty("/Status/Loggedin", true);
 				xmodel.setProperty("/User/Id", tokenModel.getProperty("/userid"));
-				//configs.setProperty("/Current/BkrNumberName", tokenModel.getProperty("/bkrnumbername"));
-				//configs.setProperty("/Current/BkrId", tokenModel.getProperty("/bkrid"));
 				xmodel.setProperty("/User/Login", login);
 				if (tokenModel.getProperty("/username")){
 					xmodel.setProperty("/User/Name", tokenModel.getProperty("/username"));
@@ -146,13 +146,13 @@ sap.ui.define([
 				// Reset Apps (remove prior login users apps) and reload app model.
 				this.resetApps();
 				this.getAppModel(configs.getProperty("/Portal/AppSource"),configs.getProperty("/Portal/AppGetPath"));
-				//location.reload();
 				
 				// Get Base Settings, only if settings yes and api-mode. Otherwise normal load via file will have happened.
-				if ((config.getProperty("/Portal/Settings")==true) && (config.getProperty("/Portal/SettingsSource")=="api")){
-					var settings=that.getSettingsModel(config.getProperty("/Portal/SettingsSource"),config.getProperty("/Portal/SettingsGetPath"));
+				if ((configs.getProperty("/Portal/Settings")==true) && (configs.getProperty("/Portal/SettingsSource")=="api")){
+					var settings=this.getSettingsModel(configs.getProperty("/Portal/SettingsSource"),configs.getProperty("/Portal/SettingsGetPath"));
 					console.log("Settings from API");
 					this.setModel(settings,"settings");
+					var that=this;
 					settings.attachRequestCompleted(function(){
 						// Sync Settings against xmodel. API Settings would have precedence.
 						that.syncSettings("api");
@@ -185,6 +185,7 @@ sap.ui.define([
 	// SECTION ON SETTINGS HANDLING
 	
 	onOpenSettingDialog: function() {
+			console.log(this.getModel("settings"));
 			BusyIndicator.show();
 			console.log("Setting");
 			
@@ -211,11 +212,6 @@ sap.ui.define([
 				this.settingCreateLabel(field, fields[field]);
 				// Get current value, if exists
 				var value=xmodel.getProperty("/Settings/")[field]
-					// Get from current Settings
-					// if (value==""){value};
-					// Get from defaults via API / File
-					// Deprecated, always load from xmodel
-					//if (value=="") {value=settingmodel.getProperty("/Values/")[field];}
 				// Create Field dependent on type
 				if (fields[field].type.slice(0, 5)=="input"){this.settingCreateInput(field, fields[field], value)};
 				if (fields[field].type=="checkbox"){this.settingCreateCheckbox(field, fields[field], value)};
@@ -224,7 +220,6 @@ sap.ui.define([
 			},
 			
 	settingCreateLabel: function(key, field) {
-			//console.log(key);
 			var frame=this.getView().byId("settingframe");
 			var labelentry= new sap.m.Label("label_"+key,{
 							required: field.required,
@@ -252,7 +247,7 @@ sap.ui.define([
 							showSuggestion: true,
 							placeholder: field.placeholder
 							});
-			// Iterate over the dropdown items.
+			// Iterate over the suggestion items.
 				field.items.forEach((li) => { 
 						inputentry.addSuggestionItem(new sap.ui.core.Item({
 											key: li.key,
@@ -305,12 +300,15 @@ sap.ui.define([
 	},
 			
 	onCloseSettingDialog : function() {
+			console.log("Close received");
 			// Update all Variables and the XModel
 			var xmodel = this.getModel("xmodel");
 			this.xmodelToSessionstorage();
 			var xmodelsession=JSON.parse(sessionStorage.xmodel)
 			var settingsinxmodel=xmodelsession["Settings"]
 			var frameitems=this.getView().byId("settingframe").getContent();
+
+			var configs = this.getModel("configs");
 	
 			frameitems.forEach((item)=> {
 				if (item.sId.slice(0, 5)=="input"){
@@ -337,7 +335,8 @@ sap.ui.define([
 		   xmodel.setJSON(JSON.stringify(xmodelsession));
 			this.getView().byId("SettingDialog").close();
 			// Check API Mode & Consequence like push to API
-			if (config.getProperty("/Portal/SettingsSource")=="api"){
+			if (configs.getProperty("/Portal/SettingsRemote")=="true"){
+				console.log("Hi There");
 				//Push to API
 				this.apipushSettings();
 			}

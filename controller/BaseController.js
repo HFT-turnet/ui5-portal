@@ -7,6 +7,7 @@ sap.ui.define([
   "use strict";
 
   return Controller.extend("ui5.hft.portal.controller.BaseController", {
+	// Standard template Base Controller Functions
     getOwnerComponent: function() {
       return Controller.prototype.getOwnerComponent.call(this);
     },
@@ -24,7 +25,21 @@ sap.ui.define([
       	this.getView().setModel(oModel, sName);
 		return this;
     },
-	
+		
+    navTo: function(sName, oParameters, bReplace) {
+		this.getRouter().navTo(sName, oParameters, undefined, bReplace);
+	  },
+	  
+	onNavBack: function() {
+		const sPreviousHash = History.getInstance().getPreviousHash();
+		if (sPreviousHash !== undefined) {
+		  window.history.go(-1);
+		} else {
+		  this.getRouter().navTo("main", {}, undefined, true);
+		}
+	  },
+
+	// XMODEL Functions
 	xmodelFromSessionstorage: function() {
 		// Xmodel has been established from scaffold. This is to load the data from sessionstorage into xmodel.
 		var xmodel = this.getModel("xmodel");
@@ -76,49 +91,9 @@ sap.ui.define([
 		})
 	},
 	
-    navTo: function(sName, oParameters, bReplace) {
-      this.getRouter().navTo(sName, oParameters, undefined, bReplace);
-    },
-	
-    onNavBack: function() {
-      const sPreviousHash = History.getInstance().getPreviousHash();
-      if (sPreviousHash !== undefined) {
-        window.history.go(-1);
-      } else {
-        this.getRouter().navTo("main", {}, undefined, true);
-      }
-    },
-
-	getAppModel: function(source, sourcepath){
-		var configs = new JSONModel();
-		configs = this.getModel("configs");
-		console.log(source);
-		if (source=="file"){
-			var appcollection=new JSONModel("model/apps.json")
-			var that=this;
-			appcollection.attachRequestCompleted(function(){
-				that.loadApps(appcollection.getProperty("/appcollection"), that);
-			});
-		}
-		if (source=="api"){
-			var appcollection=new JSONModel()
-			var oHeaders = {
-			    "Authorization": "Bearer " + sessionStorage.token
-				};
-			var path = configs.getProperty("/Portal/Backendbase") + "/" + sourcepath;
-			appcollection.loadData(path, null, true, "GET", null, false, oHeaders);
-			var that=this;
-			appcollection.attachRequestCompleted(function(){
-				//Only continue with appcollections
-				if (!(appcollection.getProperty("/appcollection")===undefined)){
-					that.loadApps(appcollection.getProperty("/appcollection"), that);
-				}
-			});
-		}
-
-	},
-	
+	// SETTINGS Functions
 	getSettingsModel: function(source,sourcepath){
+		var configs = this.getModel("configs");
 		if (source=="file"){
 			var settings=new JSONModel("model/settings.json");
 			// Works with "this" because the model is only being defined.
@@ -126,22 +101,15 @@ sap.ui.define([
 		};
 		if (source=="api"){
 			var settings=new JSONModel();
-
-			// ADD API CALL TO OBTAIN DATA
-
+			var oHeaders = {
+			    "Authorization": "Bearer " + sessionStorage.token
+				};
+			var path = configs.getProperty("/Portal/Backendbase") + "/" + sourcepath;
+			console.log(path);
+			settings.loadData(path, null, true, "GET", null, false, oHeaders);
 			this.setModel(settings,"settings");
-			
 		};
-		this.syncXmodel();
 		return settings;
-	},
-	
-	syncXmodel: function(){
-		var xmodel = this.getModel("xmodel");
-		var settings = this.getModel("settings");
-		
-		// OPEN Implement JSON extract, iteration over JSON, completion of xmodel and write back to xmodel and sessionstorage
-		
 	},
 
 	syncSettings: function(precedence){
@@ -181,7 +149,48 @@ sap.ui.define([
 	
 	apipushSettings: function(){
 		// This function pushes the settings to the API.
-		console.log("I still need to be implemented.")
+		console.log("pushing");
+		var configs = this.getModel("configs");
+		var xmodelsession=JSON.parse(sessionStorage.xmodel);
+		var settingsinxmodel=xmodelsession["Settings"];
+		var settingapi=new JSONModel();
+		var oHeaders = {
+			"Authorization": "Bearer " + sessionStorage.token
+			};
+		var path = configs.getProperty("/Portal/Backendbase") + "/" + configs.getProperty("/Portal/SettingsPostPath");
+			console.log(path);
+			settingapi.loadData(path, settingsinxmodel, true, "POST", null, false, oHeaders);
+	},
+
+	// APP Functions
+
+	getAppModel: function(source, sourcepath){
+		//var configs = new JSONModel();
+		var configs = this.getModel("configs");
+		console.log(source);
+		if (source=="file"){
+			var appcollection=new JSONModel("model/apps.json")
+			var that=this;
+			appcollection.attachRequestCompleted(function(){
+				that.loadApps(appcollection.getProperty("/appcollection"), that);
+			});
+		}
+		if (source=="api"){
+			var appcollection=new JSONModel()
+			var oHeaders = {
+			    "Authorization": "Bearer " + sessionStorage.token
+				};
+			var path = configs.getProperty("/Portal/Backendbase") + "/" + sourcepath;
+			appcollection.loadData(path, null, true, "GET", null, false, oHeaders);
+			var that=this;
+			appcollection.attachRequestCompleted(function(){
+				//Only continue with appcollections
+				if (!(appcollection.getProperty("/appcollection")===undefined)){
+					that.loadApps(appcollection.getProperty("/appcollection"), that);
+				}
+			});
+		}
+
 	},
 
 	loadApps: function(appcollection, that){

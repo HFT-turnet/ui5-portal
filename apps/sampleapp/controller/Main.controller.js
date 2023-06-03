@@ -13,7 +13,10 @@ sap.ui.define([
       this.getView().setModel(xmodel,"xmodel");
     },
     onHomePress: function() {
-			window.open("../../#","_self");
+      var xmodel = this.getModel("xmodel");
+			//window.open("../../#","_self");
+      console.log(xmodel);
+      window.open(xmodel.getProperty("/PortalPath"),"_self");
     },
     sayHello: function() {
       var text="Hello World: "+sessionStorage.token;
