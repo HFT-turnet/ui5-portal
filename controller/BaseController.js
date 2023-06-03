@@ -132,7 +132,56 @@ sap.ui.define([
 			this.setModel(settings,"settings");
 			
 		};
+		this.syncXmodel();
 		return settings;
+	},
+	
+	syncXmodel: function(){
+		var xmodel = this.getModel("xmodel");
+		var settings = this.getModel("settings");
+		
+		// OPEN Implement JSON extract, iteration over JSON, completion of xmodel and write back to xmodel and sessionstorage
+		
+	},
+
+	syncSettings: function(precedence){
+		// Xmodel and Settings must be set. precedence defines which model is the master.
+		// In run, the XModel is the lead, settings sould not be directly referenced.
+		var xmodel = this.getModel("xmodel");
+		this.xmodelToSessionstorage();
+		var xmodelsession=JSON.parse(sessionStorage.xmodel);
+		var settingsinxmodel=xmodelsession["Settings"];
+		//console.log(settingsinxmodel);
+
+		var settings = this.getModel("settings");
+		var fields = settings.getProperty("/Meta/");
+		// Go through each of the fields and check their existence in xmodel.
+		// If the field is not mentioned => create with value from settings.
+		// If the field exists, the "precedence" decides which value is taken.		
+		Object.keys(fields).forEach((field) => {
+			// Xmodel does not contain the field
+			if (!settingsinxmodel[field]) {
+				// We set the settingsourcevalue.
+				settingsinxmodel[field]=settings.getProperty("/Values/")[field];
+			}
+			// Xmodel contains the field
+			if (settingsinxmodel[field]) {
+				// Precedence is settings
+				if (precedence=="settings") {
+					settingsinxmodel[field]=settings.getProperty("/Values/")[field];
+				}
+			}
+		// Write back the updated xmodel to xmodel and sessionstorage.
+		xmodelsession["Settings"]=settingsinxmodel;
+		sessionStorage.xmodel=JSON.stringify(xmodelsession);
+		xmodel.setJSON(JSON.stringify(xmodelsession));
+		// We do not adjust the settingmodel, it is only leading for metadata and during sync.
+		});
+	},
+	
+	apipushSettings: function(){
+		// This function pushes the settings to the API.
+		console.log("I still need to be implemented.")
 	},
 
 	loadApps: function(appcollection, that){

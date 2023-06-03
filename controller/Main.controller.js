@@ -37,24 +37,38 @@ sap.ui.define([
 		// Get Configs for the App. Due to loading sequence, the model on the view is not yet available
 		var config=new JSONModel("model/config.json");
 		var that=this;
-		config.attachRequestCompleted(function(){			
+		config.attachRequestCompleted(function(){	
+			// Load Settings if they exist and source is file
+			if ((config.getProperty("/Portal/Settings")==true) && (config.getProperty("/Portal/SettingsSource")=="file")){
+				console.log("Settings from file");
+				var settings=that.getSettingsModel("file","");
+				that.setModel(settings,"settings");
+				settings.attachRequestCompleted(function(){
+					// Check Settings against xmodel. Xmodel would have precedence.
+					that.syncSettings("xmodel");
+				});
+			};	
 			// Check login-obligation (islogin via token / loginname)
 			if (config.getProperty("/Portal/LoginForced")==true){
 				// Now all logic to ensure login is performed first happens
 				if (xmodel.getProperty("/Status/Loggedin")==false){
 					that.onOpenLoginDialog();
 				}
-
-				// AFTER LOGIN CHECK PERFORM SAME ACTIVITIES AS UNDER ELSE
-				// maybe alternatively work with "return"
+				// With Login the load of Userdata and Settings is performed.
 			} else {
 				// No forced login, Settings and Apps can be generated as defined.
 				// Get the Apps
 				that.getAppModel(config.getProperty("/Portal/AppSource"),config.getProperty("/Portal/AppGetPath"));
-				// Get Base Settings, if applicable
-				if (config.getProperty("/Portal/Settings")==true){
+				// Get Base Settings, if settings exist and source is API, otherwise see above.
+				if ((config.getProperty("/Portal/Settings")==true) && (config.getProperty("/Portal/SettingsSource")=="api")){
 					var settings=that.getSettingsModel(config.getProperty("/Portal/SettingsSource"),config.getProperty("/Portal/SettingsGetPath"));
-					//console.log(settings);
+					console.log("Settings from API");
+					that.setModel(settings,"settings");
+					settings.attachRequestCompleted(function(){
+						// Check Settings against xmodel. API Settings would have precedence.
+						that.syncSettings("api");
+					});
+					console.log(settings);
 				};
 			};
 		});
@@ -133,6 +147,17 @@ sap.ui.define([
 				this.resetApps();
 				this.getAppModel(configs.getProperty("/Portal/AppSource"),configs.getProperty("/Portal/AppGetPath"));
 				//location.reload();
+				
+				// Get Base Settings, only if settings yes and api-mode. Otherwise normal load via file will have happened.
+				if ((config.getProperty("/Portal/Settings")==true) && (config.getProperty("/Portal/SettingsSource")=="api")){
+					var settings=that.getSettingsModel(config.getProperty("/Portal/SettingsSource"),config.getProperty("/Portal/SettingsGetPath"));
+					console.log("Settings from API");
+					this.setModel(settings,"settings");
+					settings.attachRequestCompleted(function(){
+						// Sync Settings against xmodel. API Settings would have precedence.
+						that.syncSettings("api");
+					});
+				};
 			};
 			// Close Box & Reload Page
 			this.getView().byId("LoginDialog").close();
@@ -170,26 +195,27 @@ sap.ui.define([
             	// create dialog via fragment factory
             	oDialog = sap.ui.xmlfragment(oView.getId(), "ui5.hft.portal.view.SettingDialog", this);
             	oView.addDependent(oDialog);
+				this.settingGenerateFields();
          		}
  			oDialog.open();
 			BusyIndicator.hide();
-			this.settingGenerateFields();
 			},
 	
 	settingGenerateFields: function() {
-			// to implement: only for the first time. After that the view is established
-		
+			var xmodel = this.getModel("xmodel");
+			console.log(xmodel);
 			var settingmodel=this.getModel("settings");			
 			var fields = settingmodel.getProperty("/Meta/");			
 			Object.keys(fields).forEach((field) => {
 				// Create Label
 				this.settingCreateLabel(field, fields[field]);
 				// Get current value, if exists
-				var value="";
-				// Get from current Settings
-				if (value==""){value};
-				// Get from defaults via API / File
-				if (value=="") {value=settingmodel.getProperty("/Values/")[field];}
+				var value=xmodel.getProperty("/Settings/")[field]
+					// Get from current Settings
+					// if (value==""){value};
+					// Get from defaults via API / File
+					// Deprecated, always load from xmodel
+					//if (value=="") {value=settingmodel.getProperty("/Values/")[field];}
 				// Create Field dependent on type
 				if (fields[field].type.slice(0, 5)=="input"){this.settingCreateInput(field, fields[field], value)};
 				if (fields[field].type=="checkbox"){this.settingCreateCheckbox(field, fields[field], value)};
@@ -263,10 +289,6 @@ sap.ui.define([
 			frame.addContent(inputentry);
 	},
 	
-	onTest: function(){
-
-	},
-			
 	onSelectChange: function(oEvent){
 			var settingmodel=this.getModel("settings");		
 			// There is a configuration option to reload value helps and the settings overall, if a drop-down is changed.
@@ -275,6 +297,9 @@ sap.ui.define([
 			
 			if (settingmodel.getProperty("/Meta/" + oEvent.getParameters().id.slice(6)).requirerefresh==true){
 				console.log("I need to reload");
+				var xmodelsession=JSON.parse(sessionStorage.xmodel)
+				// Replace the triggering setting
+				console.log(oEvent.getParameters().id.slice(6));
 			}
 			
 	},
@@ -284,7 +309,7 @@ sap.ui.define([
 			var xmodel = this.getModel("xmodel");
 			this.xmodelToSessionstorage();
 			var xmodelsession=JSON.parse(sessionStorage.xmodel)
-			var settings=xmodelsession["Settings"]
+			var settingsinxmodel=xmodelsession["Settings"]
 			var frameitems=this.getView().byId("settingframe").getContent();
 	
 			frameitems.forEach((item)=> {
@@ -303,16 +328,19 @@ sap.ui.define([
 							break;
 						}
 				// We now update / create the settings hash.
-				settings[key]=value
+				settingsinxmodel[key]=value
 			}
 		   });
 		   // Write back to session and xmodel
-		   xmodelsession["Settings"]=settings;
+		   xmodelsession["Settings"]=settingsinxmodel;
 		   sessionStorage.xmodel=JSON.stringify(xmodelsession);
 		   xmodel.setJSON(JSON.stringify(xmodelsession));
 			this.getView().byId("SettingDialog").close();
 			// Check API Mode & Consequence like push to API
-			//..
+			if (config.getProperty("/Portal/SettingsSource")=="api"){
+				//Push to API
+				this.apipushSettings();
+			}
 	}
   });
 });
