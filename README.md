@@ -14,7 +14,9 @@ The overview / portal page manages the display of the apps in the App-Folder and
 ## How To for Use Cases
 ### 1. Login
 In the config.json there are a number of switches for managing logins. All variants require an API that provides user/password authentication and provides a bearer token.
+
     a. LoginPossible: true => show the icon to click on a login. This requires the Backendbase to point to your API and the Loginpath providing the path to POST the user credentials.
+
     b. LoginForced: true => Requires all above to be activated. This requires a login before any other activities can be performed in the portal.
 
 ### 2. Source for apps
@@ -23,8 +25,12 @@ The apps can be sourced from the file (default) in the model folder. Instead the
 ### 3. Settings
 Settings can be defined in a file like in the model/settings.json.
 "Meta" describes the kind of variables and the maintenance view for these variables (when opening the settings dialog).
+
 "Values" defines the initial values of each of these variables defined in "Meta". After the instantiation of the portal, the current value of the variables is maintained in the Xmodel (see below).
-As with Login and Apps, Settings can remain local or can be set to be pulled from an API. In this case the same structure as in the file needs to be provided by the API. Settingsource needs to be set to "api", the GET path needs to be defined. If settingchanges are to be pushed to the API, set "Settingsremote" to true and provide a path for the POST request (relative to the backendpath).
+As with Login and Apps, Settings can remain local or can be set to be pulled from an API. In this case the same structure as in the file needs to be provided by the API. Settingsource needs to be set to "api", the GET path needs to be defined. 
+
+If settingchanges are to be pushed to the API, set "Settingsremote" to true and provide a path for the POST request (relative to the backendpath).
+
 Special case: a dropdown can receive the attribute: "requirerefresh"=true this triggers the settings dialog to be closed, the data to be saved, the API to receive a POST request with the settings, to immediately GET the settings again. You would want to use that, when the data in the dropdown would trigger other fields / dropdowns / value helps to contain different values.
 
 ## Background knowledge
